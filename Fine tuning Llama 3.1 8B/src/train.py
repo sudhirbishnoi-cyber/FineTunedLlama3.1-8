@@ -4,10 +4,9 @@ from trl import SFTTrainer
 from transformers import TrainingArguments
 from datasets import load_dataset
 
-# 1. Configuration
-max_seq_length = 2048 # Choose any! We auto support RoPE Scaling internally!
-dtype = None # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
-load_in_4bit = True # Use 4bit quantization to reduce memory usage. Can be False.
+
+max_seq_length = 2048
+load_in_4bit = True
 
 # 2. Load Model
 model_id = "unsloth/Meta-Llama-3.1-8B-bnb-4bit"
@@ -19,15 +18,15 @@ model, tokenizer = FastLanguageModel.from_pretrained(
     load_in_4bit = load_in_4bit,
 )
 
-# 3. Add LoRA Adapters
+# LoRA Adapters
 model = FastLanguageModel.get_peft_model(
     model,
-    r = 16, # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
+    r = 16, # Suggested 8, 16, 32, 64, 128
     target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
                       "gate_proj", "up_proj", "down_proj",],
     lora_alpha = 16,
-    lora_dropout = 0, # Supports any, but = 0 is optimized
-    bias = "none",    # Supports any, but = "none" is optimized
+    lora_dropout = 0, 
+    bias = "none",  
     use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
     random_state = 3407,
     use_rslora = False,  # We support rank stabilized LoRA
